@@ -1,6 +1,6 @@
 <?php
 // Configuración
-$webhook_url = "https://discord.com/api/webhooks/1497277480854094034/CwIFuxjcHG-oaxYTVlKoXGG1rckYFlxHwQy8EXceHFiEQOzVT51Xokx7Fw-HZ0E6GFVP";
+$webhook_url = "https://discord.com/api/webhooks/1497277480854094034/CwIFuxjcHG-oaxYTVlKoXGG1rck";
 $mi_web = "https://tusitio.com"; // CAMBIA ESTO POR TU URL REAL
 
 // Capturar datos del JS
